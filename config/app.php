@@ -77,7 +77,7 @@ return [
     'videos_per_page' => env('VIDEOS_PER_PAGE',9),
 
     'web_url' => env('WEB_URL', ""),
-
+    'enable_gifts' => env('ENABLE_GIFTS',false),
     'app_version' => env('APP_VERSION', "demo"),
 
     'app_demo' => env('APP_DEMO',''),

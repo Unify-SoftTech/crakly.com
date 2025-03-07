@@ -944,14 +944,22 @@ class SettingController extends Controller
         return redirect( config("app.admin_url").'/stream-settings/'.$request->type)->with('success',$msg);
     }
     
+    
     public function  inappPurchase(Request $request)
     {
+        if(!config('app.enable_gifts')){ 
+            return redirect()->route('admin.admin-app-version-warning');
+        }
         $action = 'edit';
-        $type="";
+        if(isset($request->type) && $request->type!=""){
+            $type=$request->type;
+        }else{
+            $type="C";
+        }
         
         $inappPurchaseSettings = DB::table('in_app_purchase_products')->select(DB::raw("*"))->get();
-
-        return view('admin.inapp-product-create',compact('action','inappPurchaseSettings','type'));
+        $giftsProductSettings= DB::table('gifts_product_settings')->select(DB::raw("*"))->first();
+        return view('admin.inapp-product-create',compact('action','inappPurchaseSettings','type','giftsProductSettings'));
     }
 
     public function  inappPurchaseUpdate(Request $request)
@@ -965,8 +973,46 @@ class SettingController extends Controller
                 'updated_at' => date('Y-m-d H:i:s')
             ]);
         }
+
         $msg = "In App purchase product Updated Successfully";
+        return redirect( config("app.admin_url").'/inapp-purchase-products/C')->with('success',$msg);
+    }
+
+    public function  giftsProductSettingsUpdate(Request $request)
+    {
+        $isRecord=DB::table('gifts_product_settings')->first();
+        $data=[];
+        $data['purchase_product_name'] = ($request->purchase_product_name) ? $request->purchase_product_name : '';
+        if($request->hasFile('purchase_product_image')) {
+            $path = 'public/uploads';
+            $filenametostore = $request->file('purchase_product_image')->store($path);
+            Storage::setVisibility($filenametostore, 'public');
+            $fileArray = explode('/',$filenametostore);
+            $purchase_product_image = array_pop($fileArray);
+            $data['purchase_product_image']=$purchase_product_image;
+           
+        }
+        $data['redeem_product_name'] = ($request->redeem_product_name) ? $request->redeem_product_name : '';
+        if($request->hasFile('redeem_product_image')) {
+            $path = 'public/uploads';
+            $filenametostore = $request->file('redeem_product_image')->store($path);
+            Storage::setVisibility($filenametostore, 'public');
+            $fileArray = explode('/',$filenametostore);
+            $redeem_product_image = array_pop($fileArray);
+            $data['redeem_product_image']=$redeem_product_image;
+           
+        } 
+
+        if($isRecord){
+            DB::table('gifts_product_settings')->where('id',1)->update($data);
+        }else{
+            DB::table('gifts_product_settings')->insert($data);
+        }
+      
+        $msg = "Product Setting Updated Successfully";
+     
         
-        return redirect( config("app.admin_url").'/inapp-purchase-products')->with('success',$msg);
+                
+        return redirect( config("app.admin_url").'/inapp-purchase-products/P')->with('success',$msg);
     }
 }

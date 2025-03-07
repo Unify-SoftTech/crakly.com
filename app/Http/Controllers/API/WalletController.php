@@ -65,51 +65,52 @@ class WalletController extends Controller
 					'updated_at' => date('Y-m-d H:i:s')
 				]);
 
-				if($status=='purchased'){
+				if ($status == 'purchased') {
 					DB::table('wallet_history')->insert([
 						'challenge_id' => 0,
 						'amount' => $amount,
 						'raw_amount' => $raw_amount,
 						'coins' => $coins,
 						'type' => 'C',
-						'status' => 'You have purchased '.$coins.' coins.',
+						'status' => 'You have purchased ' . $coins . ' coins.',
 						'user_id' => $user_id,
 						'created_at' => date('Y-m-d H:i:s'),
 						'updated_at' => date('Y-m-d H:i:s')
 					]);
 
 					$wallet_amount = auth()->guard('api')->user()->wallet_amount;
-					$wallet_amount=$wallet_amount+$coins;
+					$wallet_amount = $wallet_amount + $coins;
 					DB::table('users')->where('user_id', $user_id)->update(['wallet_amount' => $wallet_amount]);
-					$mail_settings = DB::table("mail_settings")->where("m_id",1)->first();
-                    if($mail_settings){
-    					try {
-    					    $company_settings = DB::table("settings")->where("setting_id",1)->first();
-                            $admin_email = $company_settings->site_email;
-                            $site_name = $company_settings->site_name;
-                            $from_email = $mail_settings->from_email;
-    						$user = DB::table('users')->where('active', 1)
-    							->where('deleted', 0)
-    							->where('coin_sent', 0)
-    							->where('user_id', $user_id)
-    							->first();
-    						$mailBody = "<div style='margin-bottom:60px;'><b>Dear ".$site_name." Admin,</b><br /> <br />
+					$mail_settings = DB::table("mail_settings")->where("m_id", 1)->first();
+					if ($mail_settings) {
+						try {
+							$company_settings = DB::table("settings")->where("setting_id", 1)->first();
+							$admin_email = $company_settings->site_email;
+							$site_name = $company_settings->site_name;
+							$from_email = $mail_settings->from_email;
+							$user = DB::table('users')->where('active', 1)
+								->where('deleted', 0)
+								->where('coin_sent', 0)
+								->where('user_id', $user_id)
+								->first();
+							$mailBody = "<div style='margin-bottom:60px;'><b>Dear " . $site_name . " Admin,</b><br /> <br />
     						" . $user->username . " has bought " . $coins . " coins<br/></div>";
-    						$array = array('subject' => $site_name." - User(".$user->username.")  bought ".$coins." coins in-app purchase", 'view' => 'emails.site.company_panel', 'body' => $mailBody);
-    						Mail::to($admin_email)->send(new SendMail($array));
-    					} catch (\Exception $e) {
-    					    \Log::info($e);
-    					   // dd($e);
-    					}
-                    }
+							$array = array('subject' => $site_name . " - User(" . $user->username . ")  bought " . $coins . " coins in-app purchase", 'view' => 'emails.site.company_panel', 'body' => $mailBody);
+							Mail::to($admin_email)->send(new SendMail($array));
+						} catch (\Exception $e) {
+							\Log::info($e);
+							// dd($e);
+						}
+					}
 				}
 				return response()->json(['status' => true, 'msg' => 'Record updated!']);
 			}
-		}else{
-            return response()->json([
-                "status" => false, "msg" => "Unauthorized user!"
-            ]);
-        }
+		} else {
+			return response()->json([
+				"status" => false,
+				"msg" => "Unauthorized user!"
+			]);
+		}
 	}
 
 	public function entry(Request $request)
@@ -133,16 +134,16 @@ class WalletController extends Controller
 				// $type = $request->type;
 				// $coins = $request->coins;
 				$challenge_id = $request->challenge_id;
-				$challenge=DB::table('challenges')->where('id',$challenge_id)->first();
-				$coins=$challenge->price;
-				$type='D';
+				$challenge = DB::table('challenges')->where('id', $challenge_id)->first();
+				$coins = $challenge->price;
+				$type = 'D';
 				// if ($type == 'C') {
 				// 	$wallet_amount = $wallet_amount + $coins;
 				// } else {
-					if ($wallet_amount < $coins) {
-						return response()->json(['status' => false, 'msg' => 'you have insufficient balance!']);
-					}
-					$wallet_amount = $wallet_amount - $coins;
+				if ($wallet_amount < $coins) {
+					return response()->json(['status' => false, 'msg' => 'you have insufficient balance!']);
+				}
+				$wallet_amount = $wallet_amount - $coins;
 				// }
 
 				DB::table('wallet_history')->insert([
@@ -151,7 +152,7 @@ class WalletController extends Controller
 					'amount' => 0,
 					'raw_amount' => '',
 					'type' => $type,
-					'status' => 'Coins deducted for joining the challenge '.$challenge->title,
+					'status' => 'Coins deducted for joining the challenge ' . $challenge->title,
 					'user_id' => $user_id,
 					'created_at' => date('Y-m-d H:i:s'),
 					'updated_at' => date('Y-m-d H:i:s')
@@ -165,130 +166,141 @@ class WalletController extends Controller
 						->where('user_id', $user_id)
 						->first();
 					$mailBody = "<b>Dear Admin,<b><br /> <br />
-					" . $user->username . " has spent " . $coins . " coins on ".$challenge->title." challenge";
+					" . $user->username . " has spent " . $coins . " coins on " . $challenge->title . " challenge";
 
 					$array = array('subject' => "User spent coins ", 'view' => 'emails.email', 'body' => $mailBody);
 					Mail::to('sandeep@unifysofttech.com')->send(new SendMail($array));
 				} catch (\Exception $e) {
 				}
-				
+
 				return response()->json(['status' => true, 'msg' => 'Record updated!']);
 			}
-		}else{
-            return response()->json([
-                "status" => false, "msg" => "Unauthorized user!"
-            ]);
-        }
+		} else {
+			return response()->json([
+				"status" => false,
+				"msg" => "Unauthorized user!"
+			]);
+		}
 	}
 
 	public function walletHistory(Request $request)
 	{
-    	if (auth()->guard('api')->user()) {
-    	    $user_id=auth()->guard('api')->user()->user_id;
-    	    
-            $wallet_amount=	DB::table('users')->where('user_id', $user_id)->first();
-            $wallet_amount=$wallet_amount->wallet_amount;
-            $history=DB::table('wallet_history')->select(DB::raw("*,LOWER(DATE_FORMAT(created_at,'%Y-%m-%d %H:%i:%s')) as created_at"))->where('user_id',$user_id)->orderBy('id','desc');
-            $total=$history->get()->count();
-            $history=$history->paginate(10)->items();
-            
-            // fd_newuser_200_coins
-            $new_user_coin=0;
-            $payment=DB::table('payment_history')->where('user_id',$user_id)->where('product_id','fd_newuser_200_coins')->exists();
-            if($payment){
-                $new_user_coin=1;
-            }
-            
-            return response()->json([
-    			"status" => true, "data" => $history,'total'=> $total, 'wallet_amount' => $wallet_amount,'new_user_coin' => $new_user_coin
-    		]);
-            
-    	}else{
-    		return response()->json([
-    			"status" => false, "msg" => "Unauthorized user!"
-    		]);
-    	}
+		if (auth()->guard('api')->user()) {
+			$user_id = auth()->guard('api')->user()->user_id;
+
+			$user =	DB::table('users')->where('user_id', $user_id)->first();
+			$wallet_amount = $user->wallet_amount;
+			$total_gifts = $user->total_gifts;
+			$history = DB::table('wallet_history')->select(DB::raw("*,LOWER(DATE_FORMAT(created_at,'%Y-%m-%d %H:%i:%s')) as created_at"))->where('user_id', $user_id)->orderBy('id', 'desc');
+			$total = $history->get()->count();
+			$history = $history->paginate(10)->items();
+
+			// fd_newuser_200_coins
+			$new_user_coin = 0;
+			$payment = DB::table('payment_history')->where('user_id', $user_id)->where('product_id', 'fd_newuser_200_coins')->exists();
+			if ($payment) {
+				$new_user_coin = 1;
+			}
+
+			return response()->json([
+				"status" => true,
+				"data" => $history,
+				'total' => $total,
+				'total_gifts' => $total_gifts,
+				'wallet_amount' => $wallet_amount,
+				'new_user_coin' => $new_user_coin
+			]);
+		} else {
+			return response()->json([
+				"status" => false,
+				"msg" => "Unauthorized user!"
+			]);
+		}
 	}
-	
-	public function paymentTypes(Request $request){
-	    $types=DB::table('payment_types')->get();
-	    
-	    return response()->json(['status'=> true, 'data' => $types]);
+
+	public function paymentTypes(Request $request)
+	{
+		$types = DB::table('payment_types')->get();
+
+		return response()->json(['status' => true, 'data' => $types]);
 	}
-	
-	public function withdrawRequest(Request $request){
-	   // withdraw_requests
-	   
-	   if(auth()->guard('api')->user()){
-    	    $payment_type_id = isset($request->payment_type_id) ? $request->payment_type_id : '';
-    	    $payment_id = isset($request->payment_id) ? $request->payment_id : '';
-    	    $user_id = auth()->guard('api')->user()->user_id;
-    	    $amount = isset($request->amount) ? $request->amount : '';
-    	    $coins = isset($request->coins) ? $request->coins : '';
-    	    $currency = isset($request->currency) ? $request->currency : '';
-    	    $currency_code = isset($request->currency_code) ? $request->currency_code : '';
-    	    $upi = isset($request->upi) ? $request->upi : '';
-    	    
-    	    $acc_holder_name = isset($request->acc_holder_name) ? $request->acc_holder_name : '';
-    	    $bank_name = isset($request->bank_name) ? $request->bank_name : '';
-    	    $acc_no = isset($request->acc_no) ? $request->acc_no : '';
-    	    $ifsc_code = isset($request->ifsc_code) ? $request->ifsc_code : '';
-    	    $iban = isset($request->iban) ? $request->iban : '';
-    	    $country = isset($request->country) ? $request->country : '';
-    	    $city = isset($request->city) ? $request->city : '';
-    	    $address = isset($request->address) ? $request->address : '';
-    	    $postcode = isset($request->postcode) ? $request->postcode : '';
-    	    
-    	    $status='P';
-    	   
-    	   $user=auth()->guard('api')->user();
-    	   if($user->wallet_amount >= $coins){
-    	        $data=[
-        	        'payment_type_id' => $payment_type_id,
-        	        'payment_id' => $payment_id,
-        	        'user_id' => $user_id,
-        	        'amount' => $amount,
-        	        'coins' => $coins,
-        	        'currency' => $currency,
-        	        'currency_code' => $currency_code,
-        	        'upi' => $upi,
-        	        'acc_holder_name' => $acc_holder_name,
-        	        'bank_name' => $bank_name,
-        	        'acc_no' => $acc_no,
-        	        'ifsc_code' => $ifsc_code,
-        	        'iban' => $iban,
-        	        'country' => $country,
-        	        'city' => $city,
-        	        'address' => $address,
-        	        'postcode' => $postcode,
-        	        'status' => $status,
-        	        'created_at' => date('Y-m-d H:i:s'),
-        	        'updated_at' => date('Y-m-d H:i:s'),
-    	        ];
-    	        
-    	       DB::table('withdraw_requests')->insert($data);
-        	   $wallet_amount=($user->wallet_amount - $coins);
-        	   DB::table('users')->where('user_id',$user_id)->update(['wallet_amount'=>$wallet_amount]);
-        	   return response()->json(['status'=> true, 'data' => 'Request Sent!']);
-    	   }else{
-    	       return response()->json(['status'=> false, 'data' => 'Insufficent Balance!']);
-    	   }
-    	   
-	   }else{
-	       return response()->json(['status'=> false, 'msg' => 'Unauthorized user!']);
-	   }
-	} 
-	
-	public function withdrawRequestsList(Request $request){
-	    if(auth()->guard('api')->user()){
-	        $user_id = auth()->guard('api')->user()->user_id;
-	        $requests=DB::table('withdraw_requests')->where('user_id',$user_id)->where('status','P')->orderBy('id','desc');
-	        $total=$requests->get()->count();
-	        $requests=$requests->paginate(10);
-	        return response()->json(['status'=> true, 'data' => $requests->items(),'total'=>$total]);
-	    
-    	}else{
-	       return response()->json(['status'=> false, 'msg' => 'Unauthorized user!']);
-	   }
+
+	public function withdrawRequest(Request $request)
+	{
+		// withdraw_requests
+
+		if (auth()->guard('api')->user()) {
+			$payment_type_id = isset($request->payment_type_id) ? $request->payment_type_id : '';
+			$payment_id = isset($request->payment_id) ? $request->payment_id : '';
+			$user_id = auth()->guard('api')->user()->user_id;
+			$amount = isset($request->amount) ? $request->amount : '';
+			$coins = isset($request->coins) ? $request->coins : '';
+			$currency = isset($request->currency) ? $request->currency : '';
+			$currency_code = isset($request->currency_code) ? $request->currency_code : '';
+			$upi = isset($request->upi) ? $request->upi : '';
+
+			$acc_holder_name = isset($request->acc_holder_name) ? $request->acc_holder_name : '';
+			$bank_name = isset($request->bank_name) ? $request->bank_name : '';
+			$acc_no = isset($request->acc_no) ? $request->acc_no : '';
+			$ifsc_code = isset($request->ifsc_code) ? $request->ifsc_code : '';
+			$iban = isset($request->iban) ? $request->iban : '';
+			$country = isset($request->country) ? $request->country : '';
+			$city = isset($request->city) ? $request->city : '';
+			$address = isset($request->address) ? $request->address : '';
+			$postcode = isset($request->postcode) ? $request->postcode : '';
+
+			$status = 'P';
+
+			$user = auth()->guard('api')->user();
+			if ($user->wallet_amount >= $coins) {
+				$data = [
+					'payment_type_id' => $payment_type_id,
+					'payment_id' => $payment_id,
+					'user_id' => $user_id,
+					'amount' => $amount,
+					'coins' => $coins,
+					'currency' => $currency,
+					'currency_code' => $currency_code,
+					'upi' => $upi,
+					'acc_holder_name' => $acc_holder_name,
+					'bank_name' => $bank_name,
+					'acc_no' => $acc_no,
+					'ifsc_code' => $ifsc_code,
+					'iban' => $iban,
+					'country' => $country,
+					'city' => $city,
+					'address' => $address,
+					'postcode' => $postcode,
+					'status' => $status,
+					'created_at' => date('Y-m-d H:i:s'),
+					'updated_at' => date('Y-m-d H:i:s'),
+				];
+
+				DB::table('withdraw_requests')->insert($data);
+				$wallet_amount = ($user->wallet_amount - $coins);
+				$total_gifts = ($user->total_gifts - $coins);
+				DB::table('users')->where('user_id', $user_id)
+					->update(['wallet_amount' => $wallet_amount, 'total_gifts' => $total_gifts]);
+
+				return response()->json(['status' => true, 'data' => 'Request Sent!']);
+			} else {
+				return response()->json(['status' => false, 'data' => 'Insufficent Balance!']);
+			}
+		} else {
+			return response()->json(['status' => false, 'msg' => 'Unauthorized user!']);
+		}
+	}
+
+	public function withdrawRequestsList(Request $request)
+	{
+		if (auth()->guard('api')->user()) {
+			$user_id = auth()->guard('api')->user()->user_id;
+			$requests = DB::table('withdraw_requests')->where('user_id', $user_id)->where('status', 'P')->orderBy('id', 'desc');
+			$total = $requests->get()->count();
+			$requests = $requests->paginate(10);
+			return response()->json(['status' => true, 'data' => $requests->items(), 'total' => $total]);
+		} else {
+			return response()->json(['status' => false, 'msg' => 'Unauthorized user!']);
+		}
 	}
 }

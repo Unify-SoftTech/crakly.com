@@ -24,7 +24,7 @@ if ($action == 'edit') {
         padding-left: 10px;
         font-weight: bold;
         padding-right: 10px;
-        color:#000;
+        color: #000;
     }
 
     label.title {
@@ -64,7 +64,8 @@ if ($action == 'edit') {
 
                                 <nav>
                                     <div class="nav nav-tabs" id="myTab" role="tablist">
-                                        <button class="nav-link active" id="captcha_tab" data-bs-toggle="tab" data-bs-target="#captcha_settings" type="button" role="tab" aria-controls="pusher_settings" aria-selected="true" data-type="P"> <i class="fa fa-refresh"></i> In App Purchase Products</button>
+                                        <button class="nav-link <?php echo ($type == 'C') ? 'active' : ''; ?>" id="captcha_tab" data-bs-toggle="tab" data-bs-target="#captcha_settings" type="button" role="tab" aria-controls="captcha_settings" aria-selected="true" data-type="C"> <i class="fa fa-refresh"></i> In App Purchase Products</button>
+                                        <button class="nav-link <?php echo ($type == 'P') ? 'active' : ''; ?>" id="product_tab" data-bs-toggle="tab" data-bs-target="#product_settings" type="button" role="tab" aria-controls="product_settings" aria-selected="true" data-type="P"> <i class="fa fa-gift"></i> Product Settings</button>
 
                                     </div>
                                 </nav>
@@ -97,12 +98,13 @@ if ($action == 'edit') {
                         <!-- <div class="row"> -->
 
                         <!-- <div class="row"> -->
-                        <form role="form" action="{{url( config('app.admin_url') .'/inapp-purchase-products-update')}}" method="post" enctype="multipart/form-data">
-                            {{ csrf_field() }}
-                            <div class="row">
-                                <div class="tab-content col-md-12" id="myTabContent">
-                                    <div class="row tab-pane fade show active" id="captcha_settings" role="tabpanel" aria-labelledby="captcha_setting_tab">
-                                        <div class="col-lg-12 col-md-12">
+
+                        <div class="row">
+                            <div class="tab-content col-md-12" id="myTabContent">
+                                <div class="row tab-pane fade show <?php echo ($type == 'C') ? 'active' : ''; ?>" id="captcha_settings" role="tabpanel" aria-labelledby="captcha_setting_tab">
+                                    <div class="col-lg-12 col-md-12">
+                                        <form role="form" action="{{url( config('app.admin_url') .'/inapp-purchase-products-update')}}" method="post" enctype="multipart/form-data">
+                                            {{ csrf_field() }}
                                             <div class="panel-body" style="padding-bottom: 32px;">
                                                 <label class="panel-title">In App purchase</label>
                                                 <div class="row">
@@ -110,34 +112,143 @@ if ($action == 'edit') {
                                                     <div class="col-lg-12 col-md-12">
                                                         <div style="padding-top:25px"></div>
                                                         <div class="form-group label-floating is-empty row" style="padding: 0px;margin: 0px;">
-                                                            <label class="control-label title col-md-3 nopad">Products</label>
-                                                            <select class="form-control col-md-6" name="products[]" id="products" multiple required>
-                                                                    <option disabled>Please enter value</option>
-                                                                    <?php foreach ($inappPurchaseSettings as $product) { ?>
-                                                                        <option value="<?php echo $product->title; ?>" selected><?php echo $product->title; ?></option>
-                                                                    <?php } ?>
-                            
-                                                                </select>
+                                                            <label class="control-label title ">Products</label>
+                                                            <select class="form-control " name="products[]" id="products" multiple required style="width: 100%;">
+                                                                <option disabled>Please enter value</option>
+                                                                <?php foreach ($inappPurchaseSettings as $product) { ?>
+                                                                    <option value="<?php echo $product->title; ?>" selected><?php echo $product->title; ?></option>
+                                                                <?php } ?>
+
+                                                            </select>
                                                         </div>
                                                     </div>
-                                        
+
 
                                                 </div>
                                             </div>
-                                        </div>
+                                            <div class="col-lg-12 col-md-12 mt-3" <?php if ($action == 'view') {
+                                                                                    echo "style='display:none'";
+                                                                                } ?>>
+                                                <button type="submit" class="btn btn-primary">Submit</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+
+                                <div class="row tab-pane fade show <?php echo ($type == 'P') ? 'active' : ''; ?>" id="product_settings" role="tabpanel" aria-labelledby="product_setting_tab">
+                                    <div class="col-12">
+                                        <form role="form" action="{{url( config('app.admin_url') .'/gifts-product-settings-update')}}" method="post" enctype="multipart/form-data">
+                                            {{ csrf_field() }}
+                                            <div class="panel-body" style="padding-bottom: 32px;">
+                                                <label class="panel-title">Purchase Product</label>
+                                                <div class="row">
+                                                    <div class="col-lg-12 col-md-12">
+                                                        <?php
+                                                        if (old('purchase_product_name') != '') {
+                                                            $purchase_product_name = old('purchase_product_name');
+                                                        } else if (isset($giftsProductSettings->purchase_product_name) && $giftsProductSettings->purchase_product_name != '') {
+                                                            $purchase_product_name = $giftsProductSettings->purchase_product_name;
+                                                        } else {
+                                                            $purchase_product_name = '';
+                                                        }
+                                                        ?>
+                                                        <div style="padding-top:25px"></div>
+                                                        <div class="form-group label-floating is-empty row" style="padding: 0px;margin: 0px;">
+                                                            <label class="control-label title nopad">Name</label>
+                                                            <input type="text" name="purchase_product_name" class="form-control" value="{{ $purchase_product_name }}">
+                                                        </div>
+
+                                                        <div class="col-lg-12 col-md-12">
+                                                            <div style="padding-top:15px"></div>
+                                                            <div class="form-group label-floating is-empty row" style="padding: 0px;margin: 0px;">
+                                                                <label class="control-label title col-md-3 nopad">Image</label>
+                                                                <?php
+                                                                if (old('purchase_product_image') != '') {
+                                                                    $purchase_product_image = old('purchase_product_image');
+                                                                } else if (isset($giftsProductSettings->purchase_product_image) && $giftsProductSettings->purchase_product_image != '') {
+                                                                    $purchase_product_image = $giftsProductSettings->purchase_product_image;
+                                                                } else {
+                                                                    $purchase_product_image = '';
+                                                                }
+                                                                ?>
+                                                                @if($action!='view')
+                                                                <input type="file" name="purchase_product_image" class="form-control col-md-6">
+                                                                @endif
+                                                                <input type="hidden" class="form-control" name="old_purchase_product_image" value="<?php echo $purchase_product_image; ?>" readonly>
+                                                                @if($purchase_product_image!="")
+                                                                <div class="col-3">
+                                                                    <img src="<?php echo asset(Storage::url('public/uploads/' . $purchase_product_image)); ?>" width="130px">
+                                                                </div>
+                                                                @endif
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+
+                                                </div>
+                                            </div>
+                                            <!--  -->
+
+                                            <div class="panel-body" style="padding-bottom: 32px;">
+                                                <label class="panel-title">Redeem Product</label>
+                                                <div class="row">
+                                                    <div class="col-lg-12 col-md-12">
+                                                        <div style="padding-top:25px"></div>
+                                                        <?php
+                                                        if (old('redeem_product_name') != '') {
+                                                            $redeem_product_name = old('redeem_product_name');
+                                                        } else if (isset($giftsProductSettings->redeem_product_name) && $giftsProductSettings->redeem_product_name != '') {
+                                                            $redeem_product_name = $giftsProductSettings->redeem_product_name;
+                                                        } else {
+                                                            $redeem_product_name = '';
+                                                        }
+                                                        ?>
+                                                        <div class="form-group label-floating is-empty row" style="padding: 0px;margin: 0px;">
+                                                            <label class="control-label title nopad">Name</label>
+                                                            <input type="text" name="redeem_product_name" class="form-control" value="{{ $redeem_product_name }}">
+                                                        </div>
+
+                                                        <div class="col-lg-12 col-md-12">
+                                                            <div style="padding-top:15px"></div>
+                                                            <div class="form-group label-floating is-empty row" style="padding: 0px;margin: 0px;">
+                                                                <label class="control-label title col-md-3 nopad">Image</label>
+                                                                <?php
+                                                                if (old('redeem_product_image') != '') {
+                                                                    $redeem_product_image = old('redeem_product_image');
+                                                                } else if (isset($giftsProductSettings->redeem_product_image) && $giftsProductSettings->redeem_product_image != '') {
+                                                                    $redeem_product_image = $giftsProductSettings->redeem_product_image;
+                                                                } else {
+                                                                    $redeem_product_image = '';
+                                                                }
+                                                                ?>
+                                                                @if($action!='view')
+                                                                <input type="file" name="redeem_product_image" class="form-control col-md-6">
+                                                                @endif
+                                                                <input type="hidden" class="form-control" name="old_redeem_product_image" value="<?php echo $redeem_product_image; ?>" readonly>
+                                                                @if($redeem_product_image!="")
+                                                                <div class="col-3">
+                                                                    <img src="<?php echo asset(Storage::url('public/uploads/' . $redeem_product_image)); ?>" width="130px">
+                                                                </div>
+                                                                @endif
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+
+                                                </div>
+                                            </div>
+
+                                            <div class="col-lg-12 col-md-12 mt-3" <?php if ($action == 'view') {
+                                                                                    echo "style='display:none'";
+                                                                                } ?>>
+                                                <button type="submit" class="btn btn-primary">Submit</button>
+                                            </div>
+                                        </form>
                                     </div>
                                 </div>
                             </div>
-                            <div style="padding-top:20px"></div>
-                            <div class="row">
-                                                   
-                                <div class="col-lg-12 col-md-12" <?php if ($action == 'view') {
-                                                                        echo "style='display:none'";
-                                                                    } ?>>
-                                    <button type="submit" class="btn btn-primary">Submit</button>
-                                </div>
-                            </div>
-                        </form>
+                        </div>
+                       
                     </div>
                 </div>
             </div>
@@ -176,18 +287,12 @@ if ($action == 'edit') {
         $('.nav-link').on('click', function() {
             var val = $(this).attr("data-type");
             $('#setting_type').val(val);
-            // alert(val);
-            // $("[name='mail_type']").removeAttr("checked");
-            // $(id).find("input[type='radio']").attr("checked","checked");
         });
     });
 
     $('#products').select2({
-            tags: true,
-            // minimumInputLength: 2,
-            // maximumInputLength: 3,
-            // maximumSelectionLength: 5,
-            minimumInputLength: 1
-        });
+        tags: true,
+        minimumInputLength: 1
+    });
 </script>
 @endsection

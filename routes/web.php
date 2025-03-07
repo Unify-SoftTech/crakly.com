@@ -243,8 +243,9 @@ Route::group(['prefix' => $adminRoute, 'namespace' => 'Admin', 'as' => 'admin.']
 		Route::get('/google-captcha/{type?}', 'SettingController@googleCaptchaSettings')->name('google_captcha')->middleware('app_version_check');
 		Route::post('/google-captcha-update', 'SettingController@googleCaptchaUpdate')->name('google_captcha_update');
 
-        Route::get('/inapp-purchase-products', 'SettingController@inappPurchase')->name('inapp_purchase_products')->middleware('app_version_check');
-		Route::post('/inapp-purchase-products-update', 'SettingController@inappPurchaseUpdate')->name('ginapp_purchase_products_update');
+		Route::get('/inapp-purchase-products/{type?}', 'SettingController@inappPurchase')->name('inapp_purchase_products')->middleware('app_version_check');
+		Route::post('/inapp-purchase-products-update/{type?}', 'SettingController@inappPurchaseUpdate')->name('inapp_purchase_products_update');
+		Route::post('/gifts-product-settings-update/{type?}', 'SettingController@giftsProductSettingsUpdate')->name('gifts_product_settings_update');
 		
 		Route::get('/social-media-links', 'SettingController@socialMediaLinks')->name('social_media_links');
 		Route::post('/social-media-links-update', 'SettingController@socialMediaLinksUpdate')->name('social_media_links_update');

@@ -77,6 +77,7 @@ class AppController extends Controller
             $enable_gift = $setting->enable_gift;
         }
         $stream = DB::table('stream_setting')->where('active', 1)->first();
+        $productSetting = DB::table('gifts_product_settings')->first();
 
         $res = array(
             'bgColor' => $data->bg_color,
@@ -138,6 +139,18 @@ class AppController extends Controller
         $purchase_products = DB::table('in_app_purchase_products')->select(DB::raw("group_concat(title) as products"))->first();
         if($purchase_products){
             $res['productIds'] = $purchase_products->products;
+        }
+        
+        $res['purchase_product_name'] = '';
+        $res['purchase_product_image'] = '';
+        $res['redeem_product_name'] = '';
+        $res['redeem_product_image'] = '';
+
+        if(config('app.enable_gifts') && $productSetting ){
+            $res['purchase_product_name'] = $productSetting->purchase_product_name;
+            $res['purchase_product_image'] = ($productSetting->purchase_product_image=='') ? asset('default/coins.png') : asset(Storage::url('public/uploads').'/'.$productSetting->purchase_product_image);
+            $res['redeem_product_name'] = $productSetting->redeem_product_name;
+            $res['redeem_product_image'] = ($productSetting->redeem_product_image=='') ? asset('default/diamond.png') : asset(Storage::url('public/uploads').'/'.$productSetting->redeem_product_image);
         }
         
         $response = array("status" => "success", "data" => $res);

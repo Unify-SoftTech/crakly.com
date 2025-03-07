@@ -88,6 +88,7 @@ class GiftsController extends Controller
                     ]);
                     DB::table('users')->where('user_id', $user_id)->decrement('wallet_amount', $gift->coins);
                     DB::table('users')->where('user_id', $video_user_id)->increment('wallet_amount', $gift->coins);
+                    DB::table('users')->where('user_id', $video_user_id)->increment('total_gifts', $gift->coins);
                     $wallet_amount = DB::table('users')->where('user_id', $user_id)->first()->wallet_amount;
 
                     // send notification
@@ -183,6 +184,7 @@ class GiftsController extends Controller
                     ]);
                     DB::table('users')->where('user_id', $user_id)->decrement('wallet_amount', $gift->coins);
                     DB::table('users')->where('user_id', $stream_user_id)->increment('wallet_amount', $gift->coins);
+                    DB::table('users')->where('user_id', $stream_user_id)->increment('total_gifts', $gift->coins);
                     $wallet_amount = DB::table('users')->where('user_id', $user_id)->first()->wallet_amount;
 
                     // send notification

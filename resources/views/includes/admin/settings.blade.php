@@ -15,7 +15,9 @@
         <li><a href="{{ route('admin.google_captcha') }}"><i class="bi bi-shuffle"></i> Google Captcha Settings</a></li>
         <li><a href="{{ route('admin.chat-migration') }}"><i class="bi bi-chat"></i> Chat Migration</a></li>
         <li><a href="{{ route('admin.stream_settings') }}"><i class="bi bi-camera-reels"></i> Stream</a></li>
+        <?php if(config('app.enable_gifts')){ ?>
         <li><a href="{{ route('admin.inapp_purchase_products') }}"><i class="bi bi-shuffle"></i> In App Purchase Products</a></li>
+        <?php } ?>
         {{-- <li><a href="{{ route('admin.gift') }}"><i class="bi bi-gift"></i> Gift</a></li> --}}
     </ul>
 </div>
@@ -31,29 +33,3 @@
         })
     });
 </script>
-<style type="text/css">
-    /* .btn-tab-setting {
-        background-color: white !important;
-        color: black !important;
-        padding: 13px 20px;
-        border-bottom: 1px solid #ccc;
-        line-height: 20px;
-        text-align: left;
-
-    } */
-
-    /* .btn-tab-setting.active {
-        background-color: black !important;
-        border: 2px solid black !important;
-        color: white !important;
-    } */
-
-    /* .tab-setting {
-        box-shadow: 0 2px 10px -1px rgba(69, 90, 100, 0.3);
-        border: none !important;
-        padding: 10px 10px;
-        border-radius: 8px;
-        background: white;
-        height: 100%;
-    } */
-</style>
