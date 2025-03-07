@@ -157,7 +157,7 @@ class GiftsController extends Controller
             $row = array();
             $row[] = '<div class="align-center"><input id="cb' . $no . '" name="key_m[]" class="delete_box blue-check" type="checkbox" data-val="' . $category->id . '"><label for="cb' . $no . '"></label></div>';
             $row[] = $category->name;
-            $row[] = "<img src='".asset(Storage::url('gifts/'.$category->icon))."' width=50>";
+            $row[] = "<img src='".asset(Storage::url('public/gifts/'.$category->icon))."' width=50>";
             $row[] = $category->coins;
 
             $active='Yes';

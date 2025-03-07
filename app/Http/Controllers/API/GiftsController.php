@@ -27,7 +27,7 @@ class GiftsController extends Controller
 
     public function list(Request $request)
     {
-        $path = asset(Storage::url('gifts'));
+        $path = asset(Storage::url('public/gifts'));
         $gifts = DB::table('gifts')->select(DB::raw('id,name,concat("' . $path . '","/",icon) as icon,coins'))->paginate(10);
         return response()->json(['status' => true, 'data' => $gifts->items()]);
     }
@@ -106,7 +106,7 @@ class GiftsController extends Controller
                             $title = "NEW GIFT RECEIVED";
                             $message = $user->username . " sent you a gift";
                             $fcmTokens = [$rs_post->fcm_token];
-                            $image = asset(Storage::url('gifts')) . '/' . $gift->icon;
+                            $image = asset(Storage::url('public/gifts')) . '/' . $gift->icon;
                             $param = ['id' => strval($video_id), 'type' => 'gift', 'image' => $image, 'to_id' => strval($video_user_id), 'from_id' => strval($user_id)];
                             // Notification::send(null, new UserNotification($title, $message, $image, $param, $fcmTokens));
                             $user=User::where('user_id',$rs_post->user_id)->first();  
@@ -149,7 +149,7 @@ class GiftsController extends Controller
                 $stream_id = $request->stream_id;
 
                 $gift = DB::table('gifts')->where('id', $gift_id)->first();
-                $giftImage = asset(Storage::url('gifts')) . '/' . $gift->icon;
+                $giftImage = asset(Storage::url('public/gifts')) . '/' . $gift->icon;
                 $stream = DB::table('streams')->where('id', $stream_id)->first();
                 $stream_user_id = $stream->user_id;
                 $streamUser=DB::table('users')->where('user_id',$stream_user_id)->first();
@@ -211,7 +211,7 @@ class GiftsController extends Controller
                             $title = "NEW GIFT RECEIVED";
                             $message = $user->username . " sent you a gift on your live stream";
                             $fcmTokens = [$rs_post->fcm_token];
-                            $image = asset(Storage::url('gifts')) . '/' . $gift->icon;
+                            $image = asset(Storage::url('public/gifts')) . '/' . $gift->icon;
                             $param = ['id' => strval($stream_id), 'type' => 'live-gift', 'image' => $image, 'to_id' => strval($stream_user_id), 'from_id' => strval($user_id)];
                             // Notification::send(null, new UserNotification($title, $message, $image, $param, $fcmTokens));
                             $user=User::where('user_id',$rs_post->user_id)->first();  
@@ -256,7 +256,7 @@ class GiftsController extends Controller
             $defaultFile = Storage::url("public/videos");
             $profilePath = asset(Storage::url("public/profile_pic"));
 
-            $giftPath = asset(Storage::url('gifts'));
+            $giftPath = asset(Storage::url('public/gifts'));
 
             $gifts = DB::table('video_gifts as g')
                 ->leftJoin('videos as v', 'v.video_id', 'g.video_id')
@@ -287,10 +287,10 @@ class GiftsController extends Controller
 
             $defaulProfile = asset('assets/images/profile.png');
 
-            $defaultFile = Storage::url("videos");
-            $profilePath = Storage::url("profile_pic");
+            $defaultFile = Storage::url("public/videos");
+            $profilePath = Storage::url("public/profile_pic");
 
-            $giftPath = asset(Storage::url('gifts'));
+            $giftPath = asset(Storage::url('public/gifts'));
 
             $gifts = DB::table('video_gifts as g')
                 ->leftJoin('videos as p', 'p.post_id', 'g.post_id')
