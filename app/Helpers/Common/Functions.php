@@ -1199,4 +1199,14 @@ class Functions
 
         // return response()->json($response);
     }
+
+    public static function purchase_product_name()
+    {
+        $productSetting = DB::table('gifts_product_settings')->first();
+        $purchase_product_name = '';
+        if (config('app.enable_gifts') && $productSetting) {
+            $purchase_product_name = $productSetting->purchase_product_name;
+        }
+        return $purchase_product_name;
+    }
 }

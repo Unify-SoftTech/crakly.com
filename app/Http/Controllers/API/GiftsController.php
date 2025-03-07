@@ -118,7 +118,7 @@ class GiftsController extends Controller
                     // end notification
                     return response()->json(['status' => true, 'msg' => 'Gift sent!', 'wallet_amount' => $wallet_amount]);
                 } else {
-                    return response()->json(['status' => false, 'msg' => 'Insufficent Coins!']);
+                    return response()->json(['status' => false, 'msg' => 'Insufficent '.Functions::purchase_product_name().'!']);
                 }
             }
         } else {
@@ -236,7 +236,7 @@ class GiftsController extends Controller
                     // end notification
                     return response()->json(['status' => true, 'msg' => 'Gift sent!', 'wallet_amount' => $wallet_amount]);
                 } else {
-                    return response()->json(['status' => false, 'msg' => 'Insufficent Coins!']);
+                    return response()->json(['status' => false, 'msg' => 'Insufficent '.Functions::purchase_product_name().'!']);
                 }
             }
         } else {

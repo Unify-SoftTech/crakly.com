@@ -4,6 +4,7 @@ namespace App\Http\Controllers\API;
 
 use App\Mail\SendMail;
 use Illuminate\Http\Request;
+use App\Helpers\Common\Functions;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Mail;
@@ -72,7 +73,7 @@ class WalletController extends Controller
 						'raw_amount' => $raw_amount,
 						'coins' => $coins,
 						'type' => 'C',
-						'status' => 'You have purchased ' . $coins . ' coins.',
+						'status' => 'You have purchased ' . $coins . ' '.Functions::purchase_product_name(),
 						'user_id' => $user_id,
 						'created_at' => date('Y-m-d H:i:s'),
 						'updated_at' => date('Y-m-d H:i:s')
@@ -94,8 +95,8 @@ class WalletController extends Controller
 								->where('user_id', $user_id)
 								->first();
 							$mailBody = "<div style='margin-bottom:60px;'><b>Dear " . $site_name . " Admin,</b><br /> <br />
-    						" . $user->username . " has bought " . $coins . " coins<br/></div>";
-							$array = array('subject' => $site_name . " - User(" . $user->username . ")  bought " . $coins . " coins in-app purchase", 'view' => 'emails.site.company_panel', 'body' => $mailBody);
+    						" . $user->username . " has bought " . $coins . " ".Functions::purchase_product_name()."<br/></div>";
+							$array = array('subject' => $site_name . " - User(" . $user->username . ")  bought " . $coins . " ".Functions::purchase_product_name()." in-app purchase", 'view' => 'emails.site.company_panel', 'body' => $mailBody);
 							Mail::to($admin_email)->send(new SendMail($array));
 						} catch (\Exception $e) {
 							\Log::info($e);
@@ -277,10 +278,20 @@ class WalletController extends Controller
 				];
 
 				DB::table('withdraw_requests')->insert($data);
+
+				DB::table('wallet_history')->insert([
+					'coins' => $coins,
+					'type' => 'R',
+					'status' => "Sent a withdraw request",
+					'user_id' => $user_id,
+					'created_at' => date('Y-m-d H:i:s'), 
+					'updated_at' => date('Y-m-d H:i:s')
+				]);
+
 				$wallet_amount = ($user->wallet_amount - $coins);
 				$total_gifts = ($user->total_gifts - $coins);
 				DB::table('users')->where('user_id', $user_id)
-					->update(['wallet_amount' => $wallet_amount, 'total_gifts' => $total_gifts]);
+					->update(['total_gifts' => $total_gifts]);
 
 				return response()->json(['status' => true, 'data' => 'Request Sent!']);
 			} else {

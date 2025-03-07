@@ -152,7 +152,10 @@ class AppController extends Controller
             $res['redeem_product_name'] = $productSetting->redeem_product_name;
             $res['redeem_product_image'] = ($productSetting->redeem_product_image=='') ? asset('default/diamond.png') : asset(Storage::url('public/uploads').'/'.$productSetting->redeem_product_image);
         }
-        
+
+        $res['conversion_fee'] = 10.0;
+        $res['convenience_fee'] = 15.0;
+        $res['minimum_withdraw_coins'] = 500;
         $response = array("status" => "success", "data" => $res);
         return response()->json($response);
     }
