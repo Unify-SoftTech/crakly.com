@@ -73,7 +73,7 @@ class WalletController extends Controller
 						'raw_amount' => $raw_amount,
 						'coins' => $coins,
 						'type' => 'C',
-						'status' => 'You have purchased ' . $coins . ' '.Functions::purchase_product_name(),
+						'status' => 'You have purchased ' . $coins . ' '.Functions::purchase_product_name().'.',
 						'user_id' => $user_id,
 						'created_at' => date('Y-m-d H:i:s'),
 						'updated_at' => date('Y-m-d H:i:s')
@@ -287,7 +287,6 @@ class WalletController extends Controller
 					'created_at' => date('Y-m-d H:i:s'), 
 					'updated_at' => date('Y-m-d H:i:s')
 				]);
-
 				$wallet_amount = ($user->wallet_amount - $coins);
 				$total_gifts = ($user->total_gifts - $coins);
 				DB::table('users')->where('user_id', $user_id)
